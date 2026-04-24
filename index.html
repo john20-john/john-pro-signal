@@ -594,12 +594,21 @@
                 return;
             }
 
+            function toExportPairFormat(pairText) {
+                // Example: "USD/BRL (OTC)" -> "USDBRL-OTC"
+                return pairText
+                    .replace(/\s*\(OTC\)\s*/i, "-OTC")
+                    .replace("/", "")
+                    .replace(/\s+/g, "");
+            }
+
             let text = "";
             cards.forEach((card, index) => {
                 const pair = card.querySelector(".pair").textContent;
                 const time = card.querySelector(".time").textContent;
                 const dir = card.dataset.dirName;
-                text += `${pair} ➪ ${time} ${dir}`;
+                const exportPair = toExportPairFormat(pair);
+                text += `M1;${exportPair};${time};${dir}`;
                 if (index < cards.length - 1) {
                     text += "\n";
                 }
