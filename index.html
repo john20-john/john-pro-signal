@@ -366,6 +366,22 @@
                     <option value="5">5 pairs</option>
                 </select>
             </div>
+            <div class="control-card">
+                <label for="market-mode">Market Mode</label>
+                <select id="market-mode">
+                    <option value="trend">Strong Trend</option>
+                    <option value="range">Range / Sideways</option>
+                    <option value="hybrid" selected>Hybrid Smart</option>
+                </select>
+            </div>
+            <div class="control-card">
+                <label for="last-direction">Last direction hint</label>
+                <select id="last-direction">
+                    <option value="AUTO" selected>Auto</option>
+                    <option value="PUT">Last was PUT</option>
+                    <option value="CALL">Last was CALL</option>
+                </select>
+            </div>
         </div>
 
         <div class="section-title">Select Trading Assets</div>
@@ -422,6 +438,43 @@
             document.getElementById("start-time").value = getNowTimeString();
         }
 
+        function getNextMarketDirection(previousDirection, mode) {
+            // Synthetic OTC movement model (simulation only)
+            let keepSameChance = 0.6;
+            if (mode === "trend") {
+                keepSameChance = 0.82;
+            } else if (mode === "range") {
+                keepSameChance = 0.35;
+            } else {
+                keepSameChance = 0.6;
+            }
+
+            if (!previousDirection) {
+                return Math.random() < 0.5 ? "PUT" : "CALL";
+            }
+            return Math.random() < keepSameChance
+                ? previousDirection
+                : (previousDirection === "PUT" ? "CALL" : "PUT");
+        }
+
+        function chooseSignalDirection(marketDirection, consecutiveAgainstMarket, blockStart) {
+            // Core bias: 60% PUT / 40% CALL.
+            // Smart correction: never allow >2 opposite signals in a row.
+            if (consecutiveAgainstMarket >= 2) {
+                return marketDirection;
+            }
+
+            if (blockStart) {
+                // At new block we still keep market alignment priority.
+                const alignChance = marketDirection === "PUT" ? 0.75 : 0.6;
+                if (Math.random() < alignChance) {
+                    return marketDirection;
+                }
+            }
+
+            return Math.random() < 0.6 ? "PUT" : "CALL";
+        }
+
         function renderCurrencyPairs() {
             const list = document.getElementById("currency-list");
             pairs.forEach((pair) => {
@@ -448,6 +501,8 @@
             const maxPairs = Number(document.getElementById("pair-limit").value);
             const modelStep = Number(document.getElementById("generator-model").value);
             const autoStartNow = document.getElementById("auto-start-now").checked;
+            const marketMode = document.getElementById("market-mode").value;
+            const lastDirectionHint = document.getElementById("last-direction").value;
             if (autoStartNow) {
                 applyCurrentTimeToStart();
             }
@@ -485,16 +540,22 @@
                 const blockSize = modelStep;
                 let currentBlockDirection = null;
                 let blockCounter = 0;
+                let marketDirection = lastDirectionHint === "AUTO" ? null : lastDirectionHint;
+                let consecutiveAgainstMarket = 0;
 
                 while (currentTime <= endTime) {
                     const pair = selected[Math.floor(Math.random() * selected.length)];
                     const timeStr = currentTime.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+                    marketDirection = getNextMarketDirection(marketDirection, marketMode);
 
                     // Keep direction in fixed-size blocks:
                     // model 3 => 3 same direction signals, model 5 => 5 same direction signals.
                     if (blockCounter === 0) {
-                        // 60% downtrend priority (PUT), 40% uptrend (CALL) per block
-                        currentBlockDirection = Math.random() < 0.6 ? "PUT" : "CALL";
+                        currentBlockDirection = chooseSignalDirection(
+                            marketDirection,
+                            consecutiveAgainstMarket,
+                            true
+                        );
                     }
 
                     const isPut = currentBlockDirection === "PUT";
@@ -511,12 +572,18 @@
                     `;
                     container.appendChild(card);
 
+                    if (currentBlockDirection !== marketDirection) {
+                        consecutiveAgainstMarket += 1;
+                    } else {
+                        consecutiveAgainstMarket = 0;
+                    }
+
                     blockCounter = (blockCounter + 1) % blockSize;
 
                     currentTime.setMinutes(currentTime.getMinutes() + modelStep);
                 }
 
-                showNotification(`Signals generated every ${modelStep} minute(s).`);
+                showNotification(`Smart signals generated (${modelStep}m, ${marketMode} mode).`);
             }, 700);
         }
 
