@@ -59,6 +59,7 @@
 
         .gold-text {
             background: linear-gradient(135deg, #f1c40f, #f39c12);
+            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -101,6 +102,38 @@
             font-size: 0.82rem;
             color: #9fb0d0;
             margin-bottom: 8px;
+        }
+
+        .inline-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+            font-size: 0.85rem;
+            color: #c7d4ee;
+        }
+
+        .inline-control input[type="checkbox"] {
+            accent-color: var(--primary);
+        }
+
+        .mini-btn {
+            width: 100%;
+            margin-top: 8px;
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-size: 0.86rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .mini-btn:hover {
+            border-color: var(--primary);
+            background: rgba(241, 196, 15, 0.12);
         }
 
         select,
@@ -313,6 +346,11 @@
             <div class="control-card">
                 <label for="start-time">Start Time</label>
                 <input id="start-time" type="time" value="10:00">
+                <button class="mini-btn" id="set-now-btn" type="button">Set Start = Current Time</button>
+                <label class="inline-control" for="auto-start-now">
+                    <input id="auto-start-now" type="checkbox">
+                    Auto start from current time
+                </label>
             </div>
             <div class="control-card">
                 <label for="end-time">End Time</label>
@@ -373,6 +411,17 @@
             return dt;
         }
 
+        function getNowTimeString() {
+            const now = new Date();
+            const hh = String(now.getHours()).padStart(2, "0");
+            const mm = String(now.getMinutes()).padStart(2, "0");
+            return `${hh}:${mm}`;
+        }
+
+        function applyCurrentTimeToStart() {
+            document.getElementById("start-time").value = getNowTimeString();
+        }
+
         function renderCurrencyPairs() {
             const list = document.getElementById("currency-list");
             pairs.forEach((pair) => {
@@ -398,6 +447,11 @@
         function generateTrades() {
             const maxPairs = Number(document.getElementById("pair-limit").value);
             const modelStep = Number(document.getElementById("generator-model").value);
+            const autoStartNow = document.getElementById("auto-start-now").checked;
+            if (autoStartNow) {
+                applyCurrentTimeToStart();
+            }
+
             const startValue = document.getElementById("start-time").value;
             const endValue = document.getElementById("end-time").value;
 
@@ -428,12 +482,22 @@
                 loader.style.display = "none";
                 const selected = Array.from(selectedPairs);
                 let currentTime = new Date(startTime.getTime());
+                const blockSize = modelStep;
+                let currentBlockDirection = null;
+                let blockCounter = 0;
 
                 while (currentTime <= endTime) {
                     const pair = selected[Math.floor(Math.random() * selected.length)];
                     const timeStr = currentTime.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
-                    // 60% downtrend priority (PUT), 40% uptrend (CALL)
-                    const isPut = Math.random() < 0.6;
+
+                    // Keep direction in fixed-size blocks:
+                    // model 3 => 3 same direction signals, model 5 => 5 same direction signals.
+                    if (blockCounter === 0) {
+                        // 60% downtrend priority (PUT), 40% uptrend (CALL) per block
+                        currentBlockDirection = Math.random() < 0.6 ? "PUT" : "CALL";
+                    }
+
+                    const isPut = currentBlockDirection === "PUT";
 
                     const card = document.createElement("div");
                     card.className = "signal-card";
@@ -446,6 +510,8 @@
                         </span>
                     `;
                     container.appendChild(card);
+
+                    blockCounter = (blockCounter + 1) % blockSize;
 
                     currentTime.setMinutes(currentTime.getMinutes() + modelStep);
                 }
@@ -492,6 +558,11 @@
                 document.querySelectorAll(".pair-card").forEach((card) => card.classList.remove("selected"));
                 showNotification(`Selection reset. Choose ${maxPairs} pair(s).`);
             }
+        });
+
+        document.getElementById("set-now-btn").addEventListener("click", () => {
+            applyCurrentTimeToStart();
+            showNotification("Start time set to current time.");
         });
 
         renderCurrencyPairs();
