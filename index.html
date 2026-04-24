@@ -612,16 +612,11 @@
 
             function toExportPairFormat(pairText, timeframeLabel) {
                 // Example display: "USD/BRL (OTC)"
-                // M1 export => "USDBRL-OTC"
-                // M15 export => "USDBRL"
+                // M1/M15 export => "USDBRL-OTC"
                 const rawPair = pairText
                     .replace(/\s*\(OTC\)\s*/i, "")
                     .replace("/", "")
                     .replace(/\s+/g, "");
-
-                if (timeframeLabel === "M15") {
-                    return rawPair;
-                }
                 return `${rawPair}-OTC`;
             }
 
