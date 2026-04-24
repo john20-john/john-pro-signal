@@ -23,7 +23,7 @@
 
         body {
             background: var(--bg-dark);
-            background-image: 
+            background-image:
                 radial-gradient(circle at 20% 30%, rgba(241, 196, 15, 0.05) 0%, transparent 50%),
                 radial-gradient(circle at 80% 70%, rgba(52, 152, 219, 0.05) 0%, transparent 50%);
             color: #ffffff;
@@ -36,22 +36,22 @@
         }
 
         .container {
-            max-width: 800px;
+            max-width: 900px;
             width: 100%;
             background: var(--glass);
             backdrop-filter: blur(15px);
             border: 1px solid var(--glass-border);
             border-radius: 24px;
-            padding: 40px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            padding: 32px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
         }
 
         header {
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
         h1 {
-            font-size: 2.8rem;
+            font-size: 2.5rem;
             letter-spacing: -1px;
             margin-bottom: 10px;
             font-weight: 800;
@@ -70,7 +70,7 @@
 
         .subtitle {
             color: #8892b0;
-            font-size: 1.1rem;
+            font-size: 1.05rem;
         }
 
         .section-title {
@@ -78,15 +78,51 @@
             text-transform: uppercase;
             letter-spacing: 2px;
             color: var(--primary);
-            margin-bottom: 20px;
+            margin: 18px 0 12px;
             font-weight: 600;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .control-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .control-card label {
+            display: block;
+            font-size: 0.82rem;
+            color: #9fb0d0;
+            margin-bottom: 8px;
+        }
+
+        select,
+        input[type="time"] {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 0.95rem;
+        }
+
+        option {
+            color: #111;
         }
 
         #currency-list {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
             gap: 12px;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
         .pair-card {
@@ -95,14 +131,15 @@
             padding: 15px;
             border-radius: 12px;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.25s ease;
             font-weight: 500;
             color: #ccd6f6;
+            user-select: none;
         }
 
         .pair-card:hover {
             background: rgba(255, 255, 255, 0.08);
-            transform: translateY(-3px);
+            transform: translateY(-2px);
             border-color: var(--primary);
         }
 
@@ -110,23 +147,24 @@
             background: var(--primary);
             color: #000;
             border-color: var(--primary);
-            box-shadow: 0 0 20px rgba(241, 196, 15, 0.3);
+            box-shadow: 0 0 18px rgba(241, 196, 15, 0.25);
         }
 
         .actions {
             display: flex;
-            gap: 15px;
+            gap: 12px;
             justify-content: center;
-            margin-top: 20px;
+            margin-top: 12px;
+            flex-wrap: wrap;
         }
 
         button {
-            padding: 16px 32px;
+            padding: 14px 24px;
             font-size: 1rem;
             font-weight: 700;
             border-radius: 12px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.25s;
             border: none;
             display: flex;
             align-items: center;
@@ -156,7 +194,7 @@
 
         #loading-spinner {
             display: none;
-            margin: 30px auto;
+            margin: 22px auto;
             width: 40px;
             height: 40px;
             border: 3px solid rgba(241, 196, 15, 0.1);
@@ -165,24 +203,24 @@
             animation: spin 0.8s linear infinite;
         }
 
-        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
 
         #trades {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             gap: 15px;
-            margin-top: 40px;
+            margin-top: 24px;
             width: 100%;
         }
 
         .signal-card {
-            background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
             border-radius: 16px;
-            padding: 20px;
+            padding: 18px;
             border: 1px solid var(--glass-border);
             text-align: left;
-            position: relative;
-            overflow: hidden;
             animation: fadeIn 0.5s ease forwards;
         }
 
@@ -200,7 +238,7 @@
         }
 
         .signal-card .time {
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             font-weight: 800;
             margin-bottom: 4px;
         }
@@ -213,28 +251,44 @@
             display: inline-block;
         }
 
-        .dir-call { background: rgba(46, 204, 113, 0.1); color: #2ecc71; }
-        .dir-put { background: rgba(231, 76, 60, 0.1); color: #e74c3c; }
+        .dir-call {
+            background: rgba(46, 204, 113, 0.1);
+            color: #2ecc71;
+        }
+
+        .dir-put {
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+        }
 
         #notification {
             position: fixed;
             bottom: 30px;
             right: 30px;
-            padding: 15px 25px;
+            padding: 12px 18px;
             background: var(--secondary);
             border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             display: none;
             z-index: 1000;
             animation: slideUp 0.3s ease;
         }
 
-        @keyframes slideUp { from { transform: translateY(100px); } to { transform: translateY(0); } }
+        @keyframes slideUp {
+            from { transform: translateY(100px); }
+            to { transform: translateY(0); }
+        }
 
         @media (max-width: 600px) {
-            .container { padding: 25px 15px; }
-            h1 { font-size: 2rem; }
-            #currency-list { grid-template-columns: 1fr 1fr; }
+            .container {
+                padding: 20px 12px;
+            }
+            h1 {
+                font-size: 1.9rem;
+            }
+            #currency-list {
+                grid-template-columns: 1fr 1fr;
+            }
         }
     </style>
 </head>
@@ -247,7 +301,36 @@
             <p class="subtitle">Next-Generation Binary Options Signal Engine</p>
         </header>
 
-        <div class="section-title">Select 4 Trading Assets</div>
+        <div class="section-title">Generation Settings</div>
+        <div class="controls">
+            <div class="control-card">
+                <label for="generator-model">Generator Model</label>
+                <select id="generator-model">
+                    <option value="3">Model A (every 3 minutes)</option>
+                    <option value="5">Model B (every 5 minutes)</option>
+                </select>
+            </div>
+            <div class="control-card">
+                <label for="start-time">Start Time</label>
+                <input id="start-time" type="time" value="10:00">
+            </div>
+            <div class="control-card">
+                <label for="end-time">End Time</label>
+                <input id="end-time" type="time" value="23:59">
+            </div>
+            <div class="control-card">
+                <label for="pair-limit">Number of pairs to use</label>
+                <select id="pair-limit">
+                    <option value="1">1 pair</option>
+                    <option value="2">2 pairs</option>
+                    <option value="3" selected>3 pairs</option>
+                    <option value="4">4 pairs</option>
+                    <option value="5">5 pairs</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="section-title">Select Trading Assets</div>
         <div id="currency-list"></div>
 
         <div class="actions">
@@ -268,33 +351,44 @@
     <script>
         const pairs = [
             "CAD/CHF (OTC)", "CAD/JPY (OTC)", "CHF/JPY (OTC)", "USD/BDT (OTC)",
-            "CAD/CHF (OTC)", "USD/COP (OTC)", "USD/DZD (OTC)", "USD/EGP (OTC)"
+            "USD/COP (OTC)", "USD/DZD (OTC)", "USD/EGP (OTC)", "EUR/JPY (OTC)"
         ];
 
         const selectedPairs = new Set();
 
         function showNotification(msg) {
-            const nav = document.getElementById('notification');
+            const nav = document.getElementById("notification");
             nav.textContent = msg;
-            nav.style.display = 'block';
-            setTimeout(() => nav.style.display = 'none', 3000);
+            nav.style.display = "block";
+            setTimeout(() => {
+                nav.style.display = "none";
+            }, 3000);
+        }
+
+        function parseTimeToDate(timeValue) {
+            const [hours, minutes] = timeValue.split(":").map(Number);
+            const dt = new Date();
+            dt.setSeconds(0, 0);
+            dt.setHours(hours, minutes, 0, 0);
+            return dt;
         }
 
         function renderCurrencyPairs() {
-            const list = document.getElementById('currency-list');
-            pairs.forEach(pair => {
-                const card = document.createElement('div');
-                card.className = 'pair-card';
+            const list = document.getElementById("currency-list");
+            pairs.forEach((pair) => {
+                const card = document.createElement("div");
+                card.className = "pair-card";
                 card.textContent = pair;
                 card.onclick = () => {
+                    const maxPairs = Number(document.getElementById("pair-limit").value);
                     if (selectedPairs.has(pair)) {
                         selectedPairs.delete(pair);
-                        card.classList.remove('selected');
-                    } else if (selectedPairs.size < 4) {
+                        card.classList.remove("selected");
+                    } else if (selectedPairs.size < maxPairs) {
                         selectedPairs.add(pair);
-                        card.classList.add('selected');
+                        card.classList.add("selected");
                     } else {
-                        showNotification("Portfolio Limit: Select exactly 4 pairs.");
+                        showNotification(`Portfolio Limit: Select only ${maxPairs} pair(s).`);
                     }
                 };
                 list.appendChild(card);
@@ -302,52 +396,66 @@
         }
 
         function generateTrades() {
-            if (selectedPairs.size !== 4) {
-                showNotification("Error: Please select 4 assets to begin analysis.");
+            const maxPairs = Number(document.getElementById("pair-limit").value);
+            const modelStep = Number(document.getElementById("generator-model").value);
+            const startValue = document.getElementById("start-time").value;
+            const endValue = document.getElementById("end-time").value;
+
+            if (!startValue || !endValue) {
+                showNotification("Please define both start and end time.");
                 return;
             }
 
-            const loader = document.getElementById('loading-spinner');
-            const container = document.getElementById('trades');
-            container.innerHTML = '';
-            loader.style.display = 'block';
+            if (selectedPairs.size !== maxPairs) {
+                showNotification(`Please select exactly ${maxPairs} pair(s).`);
+                return;
+            }
+
+            const startTime = parseTimeToDate(startValue);
+            const endTime = parseTimeToDate(endValue);
+
+            if (startTime >= endTime) {
+                showNotification("Start time must be earlier than end time.");
+                return;
+            }
+
+            const loader = document.getElementById("loading-spinner");
+            const container = document.getElementById("trades");
+            container.innerHTML = "";
+            loader.style.display = "block";
 
             setTimeout(() => {
-                loader.style.display = 'none';
-                const now = new Date();
-                const endTime = new Date();
-                endTime.setHours(23, 59, 59);
-
+                loader.style.display = "none";
                 const selected = Array.from(selectedPairs);
-                let currentTime = new Date(now.getTime());
-                currentTime.setMinutes(currentTime.getMinutes() + 2);
+                let currentTime = new Date(startTime.getTime());
 
-                while (currentTime < endTime) {
+                while (currentTime <= endTime) {
                     const pair = selected[Math.floor(Math.random() * selected.length)];
-                    const timeStr = currentTime.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-                    const isCall = currentTime.getMinutes() % 2 !== 0;
-                    
-                    const card = document.createElement('div');
-                    card.className = 'signal-card';
-                    // Store technical direction value in data attribute for clean copying
-                    card.dataset.dirName = isCall ? 'CALL' : 'PUT';
+                    const timeStr = currentTime.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+                    // 60% downtrend priority (PUT), 40% uptrend (CALL)
+                    const isPut = Math.random() < 0.6;
+
+                    const card = document.createElement("div");
+                    card.className = "signal-card";
+                    card.dataset.dirName = isPut ? "PUT" : "CALL";
                     card.innerHTML = `
                         <span class="pair">${pair}</span>
                         <div class="time">${timeStr}</div>
-                        <span class="direction ${isCall ? 'dir-call' : 'dir-put'}">
-                            ${isCall ? '↑ CALL' : '↓ PUT'}
+                        <span class="direction ${isPut ? "dir-put" : "dir-call"}">
+                            ${isPut ? "↓ PUT" : "↑ CALL"}
                         </span>
                     `;
                     container.appendChild(card);
-                    
-                    currentTime.setMinutes(currentTime.getMinutes() + Math.floor(Math.random() * 10) + 5);
+
+                    currentTime.setMinutes(currentTime.getMinutes() + modelStep);
                 }
-                showNotification("Algorithm Success: Signals generated until 23:59");
-            }, 2000);
+
+                showNotification(`Signals generated every ${modelStep} minute(s).`);
+            }, 700);
         }
 
         function copyTrades() {
-            const cards = document.querySelectorAll('.signal-card');
+            const cards = document.querySelectorAll(".signal-card");
             if (cards.length === 0) {
                 showNotification("No data available to copy.");
                 return;
@@ -355,23 +463,36 @@
 
             let text = "";
             cards.forEach((card, index) => {
-                const pair = card.querySelector('.pair').textContent;
-                const time = card.querySelector('.time').textContent;
-                const dir = card.dataset.dirName; // Get clean CALL/PUT value
-                
+                const pair = card.querySelector(".pair").textContent;
+                const time = card.querySelector(".time").textContent;
+                const dir = card.dataset.dirName;
                 text += `${pair} ➪ ${time} ${dir}`;
-                // Add newline if not the last item
-                if (index < cards.length - 1) text += "\n";
+                if (index < cards.length - 1) {
+                    text += "\n";
+                }
             });
 
-            const el = document.createElement('textarea');
-            el.value = text;
-            document.body.appendChild(el);
-            el.select();
-            document.execCommand('copy');
-            document.body.removeChild(el);
-            showNotification("Signals copied in requested format!");
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification("Signals copied in requested format!");
+            }).catch(() => {
+                const el = document.createElement("textarea");
+                el.value = text;
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand("copy");
+                document.body.removeChild(el);
+                showNotification("Signals copied in requested format!");
+            });
         }
+
+        document.getElementById("pair-limit").addEventListener("change", () => {
+            const maxPairs = Number(document.getElementById("pair-limit").value);
+            if (selectedPairs.size > maxPairs) {
+                selectedPairs.clear();
+                document.querySelectorAll(".pair-card").forEach((card) => card.classList.remove("selected"));
+                showNotification(`Selection reset. Choose ${maxPairs} pair(s).`);
+            }
+        });
 
         renderCurrencyPairs();
     </script>
