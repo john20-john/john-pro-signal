@@ -339,8 +339,9 @@
             <div class="control-card">
                 <label for="generator-model">Generator Model</label>
                 <select id="generator-model">
-                    <option value="3">Model A (every 3 minutes)</option>
-                    <option value="5">Model B (every 5 minutes)</option>
+                    <option value="M1_3">Model A (M1, every 3 minutes)</option>
+                    <option value="M1_5">Model B (M1, every 5 minutes)</option>
+                    <option value="M15_15">Model C (M15 OTC, every 15 minutes)</option>
                 </select>
             </div>
             <div class="control-card">
@@ -404,8 +405,11 @@
 
     <script>
         const pairs = [
-            "CAD/CHF (OTC)", "CAD/JPY (OTC)", "CHF/JPY (OTC)", "USD/BDT (OTC)",
-            "USD/COP (OTC)", "USD/DZD (OTC)", "USD/EGP (OTC)", "EUR/JPY (OTC)"
+            "AUD/USD (OTC)", "EUR/GBP (OTC)", "USD/CAD (OTC)", "EUR/JPY (OTC)",
+            "GBP/JPY (OTC)", "EUR/USD (OTC)", "GBP/USD (OTC)", "USD/JPY (OTC)",
+            "NZD/USD (OTC)", "AUD/JPY (OTC)", "CAD/CHF (OTC)", "CAD/JPY (OTC)",
+            "CHF/JPY (OTC)", "USD/BDT (OTC)", "USD/COP (OTC)", "USD/DZD (OTC)",
+            "USD/EGP (OTC)", "EUR/CAD (OTC)", "GBP/CAD (OTC)", "AUD/CAD (OTC)"
         ];
 
         const selectedPairs = new Set();
@@ -475,6 +479,17 @@
             return Math.random() < 0.6 ? "PUT" : "CALL";
         }
 
+        function getModelConfig() {
+            const model = document.getElementById("generator-model").value;
+            if (model === "M1_3") {
+                return { timeframeLabel: "M1", step: 3, blockSize: 3, fullDayForM15: false };
+            }
+            if (model === "M1_5") {
+                return { timeframeLabel: "M1", step: 5, blockSize: 5, fullDayForM15: false };
+            }
+            return { timeframeLabel: "M15", step: 15, blockSize: 3, fullDayForM15: true };
+        }
+
         function renderCurrencyPairs() {
             const list = document.getElementById("currency-list");
             pairs.forEach((pair) => {
@@ -499,7 +514,8 @@
 
         function generateTrades() {
             const maxPairs = Number(document.getElementById("pair-limit").value);
-            const modelStep = Number(document.getElementById("generator-model").value);
+            const modelConfig = getModelConfig();
+            const modelStep = modelConfig.step;
             const autoStartNow = document.getElementById("auto-start-now").checked;
             const marketMode = document.getElementById("market-mode").value;
             const lastDirectionHint = document.getElementById("last-direction").value;
@@ -520,8 +536,8 @@
                 return;
             }
 
-            const startTime = parseTimeToDate(startValue);
-            const endTime = parseTimeToDate(endValue);
+            const startTime = modelConfig.fullDayForM15 ? parseTimeToDate("00:00") : parseTimeToDate(startValue);
+            const endTime = modelConfig.fullDayForM15 ? parseTimeToDate("23:45") : parseTimeToDate(endValue);
 
             if (startTime >= endTime) {
                 showNotification("Start time must be earlier than end time.");
@@ -537,7 +553,7 @@
                 loader.style.display = "none";
                 const selected = Array.from(selectedPairs);
                 let currentTime = new Date(startTime.getTime());
-                const blockSize = modelStep;
+                const blockSize = modelConfig.blockSize;
                 let currentBlockDirection = null;
                 let blockCounter = 0;
                 let marketDirection = lastDirectionHint === "AUTO" ? null : lastDirectionHint;
@@ -583,7 +599,7 @@
                     currentTime.setMinutes(currentTime.getMinutes() + modelStep);
                 }
 
-                showNotification(`Smart signals generated (${modelStep}m, ${marketMode} mode).`);
+                showNotification(`Smart signals generated (${modelConfig.timeframeLabel}, ${modelStep}m, ${marketMode} mode).`);
             }, 700);
         }
 
@@ -594,21 +610,29 @@
                 return;
             }
 
-            function toExportPairFormat(pairText) {
-                // Example: "USD/BRL (OTC)" -> "USDBRL-OTC"
-                return pairText
-                    .replace(/\s*\(OTC\)\s*/i, "-OTC")
+            function toExportPairFormat(pairText, timeframeLabel) {
+                // Example display: "USD/BRL (OTC)"
+                // M1 export => "USDBRL-OTC"
+                // M15 export => "USDBRL"
+                const rawPair = pairText
+                    .replace(/\s*\(OTC\)\s*/i, "")
                     .replace("/", "")
                     .replace(/\s+/g, "");
+
+                if (timeframeLabel === "M15") {
+                    return rawPair;
+                }
+                return `${rawPair}-OTC`;
             }
 
+            const modelConfig = getModelConfig();
             let text = "";
             cards.forEach((card, index) => {
                 const pair = card.querySelector(".pair").textContent;
                 const time = card.querySelector(".time").textContent;
                 const dir = card.dataset.dirName;
-                const exportPair = toExportPairFormat(pair);
-                text += `M1;${exportPair};${time};${dir}`;
+                const exportPair = toExportPairFormat(pair, modelConfig.timeframeLabel);
+                text += `${modelConfig.timeframeLabel};${exportPair};${time};${dir}`;
                 if (index < cards.length - 1) {
                     text += "\n";
                 }
@@ -639,6 +663,15 @@
         document.getElementById("set-now-btn").addEventListener("click", () => {
             applyCurrentTimeToStart();
             showNotification("Start time set to current time.");
+        });
+
+        document.getElementById("generator-model").addEventListener("change", () => {
+            const modelConfig = getModelConfig();
+            if (modelConfig.timeframeLabel === "M15") {
+                document.getElementById("start-time").value = "00:00";
+                document.getElementById("end-time").value = "23:45";
+                showNotification("M15 mode uses full-day schedule (00:00 to 23:45).");
+            }
         });
 
         renderCurrencyPairs();
